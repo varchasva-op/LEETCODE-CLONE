@@ -1,23 +1,28 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';  // ← NEW LINE. Add this import.
+import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../api/client';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    if (!email || !password) {
-      setError('Please fill in both fields');
-      return;
+    try {
+      const data = await api.login({ email, password });
+      localStorage.setItem('token', data.token);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setLoading(false);
     }
-
-    console.log('Login attempt:', { email, password });
-    alert('Form works! API call coming soon.');
   }
 
   return (
@@ -45,7 +50,6 @@ export default function Login() {
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
-      {/* ↓ NEW LINES below: */}
       <p>
         Don't have an account? <Link to="/signup">Sign up</Link>
       </p>

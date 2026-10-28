@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../api/client.ts';
 
 export default function Signup() {
   const [username, setUsername] = useState('');
@@ -7,18 +8,22 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    if (!username || !email || !password) {
-      setError('Please fill in all fields');
-      return;
+    try {
+      const data = await api.signup({ username, email, password });
+      localStorage.setItem('token', data.token);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Signup failed');
+    } finally {
+      setLoading(false);
     }
-
-    console.log('Signup attempt:', { username, email, password });
-    alert('Signup form works!');
   }
 
   return (
@@ -51,7 +56,7 @@ export default function Signup() {
         </div>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit" disabled={loading}>
-          Sign Up
+          {loading ? 'Creating account...' : 'Sign Up'}
         </button>
       </form>
       <p>

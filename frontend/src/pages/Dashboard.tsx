@@ -1,17 +1,36 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../api/client';
+
+interface User {
+  id: string;
+  username: string;
+  email: string;
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
+    async function loadUser() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const data = await api.me();
+        setUser(data.user);
+      } catch (err) {
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
     }
-    setUserEmail('authenticated user');
+
+    loadUser();
   }, [navigate]);
 
   function handleLogout() {
@@ -19,15 +38,19 @@ export default function Dashboard() {
     navigate('/login');
   }
 
+  if (error) {
+    return <div><p style={{ color: 'red' }}>{error}</p></div>;
+  }
+
+  if (!user) {
+    return <div><p>Loading...</p></div>;
+  }
+
   return (
     <div>
       <h1>Dashboard</h1>
-      {userEmail && (
-        <>
-          <p>Welcome, {userEmail}!</p>
-          <button onClick={handleLogout}>Logout</button>
-        </>
-      )}
+      <p>Welcome, <strong>{user.username}</strong> ({user.email})!</p>
+      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 }
