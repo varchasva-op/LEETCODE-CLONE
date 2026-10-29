@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 
 interface User {
@@ -50,6 +50,7 @@ export default function Dashboard() {
     <div>
       <h1>Dashboard</h1>
       <p>Welcome, <strong>{user.username}</strong> ({user.email})!</p>
+      <p><Link to="/problems">📝 Browse Problems</Link></p>
       <button onClick={handleLogout}>Logout</button>
     </div>
   );
