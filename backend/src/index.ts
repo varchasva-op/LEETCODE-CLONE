@@ -1,8 +1,9 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./config/db');
-const authRoutes = require('./routes/auth');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import connectDB from './config/db';
+import authRoutes from './routes/auth';
+import problemRoutes from './routes/problems';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -12,7 +13,7 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
     service: 'leetcode-api',
@@ -21,6 +22,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/problems', problemRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
